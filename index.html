@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Attendance Location Check</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+    .message { font-size: 1.2em; margin-top: 20px; }
+    .btn { padding: 10px 20px; font-size: 1em; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+<h2>Attendance Verification</h2>
+<p>कृपया अपनी location verify करने के लिए नीचे वीडियो गए बटन पर क्लिक करें।</p>
+
+<button onclick="checkLocation()" class="btn">Check Location</button>
+
+<p class="message" id="message"></p>
+
+<script>
+const targetLat = 24.886819;
+const targetLng = 86.822882;
+const radius = 100; // meters
+
+function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+    const R = 6371e3;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+function checkLocation() {
+    if (!navigator.geolocation) {
+        document.getElementById('message').innerText = "आपका ब्राउज़र location access को support नहीं करता।";
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(position => {
+        const userLat = position.coords.latitude;
+        const userLng = position.coords.longitude;
+        const distance = getDistanceFromLatLonInMeters(userLat, userLng, targetLat, targetLng);
+
+        if (distance <= radius) {
+            document.getElementById('message').innerText = "लोकेशन सत्यापित हो गई है ✅, attendance form खुल रहा है...";
+            setTimeout(() => {
+                window.location.href = "https://forms.gle/wYrNUhaRw5cos16T7";
+            }, 2000);
+        } else {
+            document.getElementById('message').innerText = "आप सही स्थान पर नहीं हैं ❌. कृपया श्रावणी मेला क्षेत्र में जाकर पुनः प्रयास करें।";
+        }
+
+    }, () => {
+        document.getElementById('message').innerText = "Location access अनुमति नहीं मिली। कृपया GPS ऑन करें और पुनः प्रयास करें।";
+    });
+}
+</script>
+
+</body>
+</html>
